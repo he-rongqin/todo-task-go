@@ -2,16 +2,29 @@ package model
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"rongqin.cn/todo_task/conf"
 )
 
 var dbMysql *gorm.DB
 
 func DataSourceMysql(dbconfig conf.DataSourceMysql) {
+
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer（日志输出的目标，前缀和日志包含的内容——译者注）
+		logger.Config{
+			SlowThreshold:             time.Second, // 慢 SQL 阈值
+			LogLevel:                  logger.Info, // 日志级别
+			IgnoreRecordNotFoundError: true,        // 忽略ErrRecordNotFound（记录未找到）错误
+			Colorful:                  false,       // 禁用彩色打印
+		},
+	)
 
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       dbconfig.DSN, // DSN data source name
@@ -20,7 +33,9 @@ func DataSourceMysql(dbconfig conf.DataSourceMysql) {
 		DontSupportRenameIndex:    true,         // 重命名索引时采用删除并新建的方式，MySQL 5.7 之前的数据库和 MariaDB 不支持重命名索引
 		DontSupportRenameColumn:   true,         // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
 		SkipInitializeWithVersion: false,        // 根据当前 MySQL 版本自动配置
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		Logger: newLogger,
+	})
 	sqlDB, _ := db.DB()
 	// SetMaxIdleConns 设置空闲连接池中连接的最大数量
 	if dbconfig.MaxIdleConns == 0 {
