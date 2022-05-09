@@ -10,9 +10,9 @@ const (
 )
 
 type Response struct {
-	Status int16       `json:"status"`
+	Status int16       `json:"code"`
 	Msg    string      `json:"msg"`
-	ErrMsg error       `json:"errorMsg"`
+	ErrMsg string      `json:"errorMsg"`
 	Data   interface{} `json:"data"`
 }
 
@@ -38,7 +38,7 @@ func Fail(msg string, err error) Response {
 	return Response{
 		Status: SERVER_ERR,
 		Msg:    msg,
-		ErrMsg: err,
+		ErrMsg: err.Error(),
 	}
 }
 

@@ -6,24 +6,49 @@ import (
 	"rongqin.cn/todo_task/service"
 )
 
-// 用户登录
-func UserLogin(c *gin.Context) {
+var userService service.UserService
 
+// 用户登录
+func UserLoginEndpoint(c *gin.Context) {
+
+	var userLogin service.FormUserLogin
+	if err := c.ShouldBind(&userLogin); err != nil {
+		c.JSON(response.BADREQUEST, response.BadReq(err.Error()))
+		return
+	}
+	res := userService.Login(&userLogin)
+	if res.Status != 200 {
+		c.JSON(response.BADREQUEST, res)
+		return
+	}
+	c.JSON(response.SUCCESS, res)
 }
 
 // 用户注册
-func UserRegister(c *gin.Context) {
+func UserRegisterEndpoint(c *gin.Context) {
 
 	var userRegister service.FormUserRegister
 	if err := c.ShouldBind(&userRegister); err != nil {
 		c.JSON(response.BADREQUEST, response.BadReq(err.Error()))
 		return
 	}
-	res := userRegister.Register()
+	res := userService.Register(&userRegister)
 	if res.Status != 200 {
 		c.JSON(response.BADREQUEST, res)
 		return
 	}
 	c.JSON(response.SUCCESS, res)
 
+}
+
+func GetUserInfoEndpoint(c *gin.Context) {
+
+	u := c.GetInt("uid")
+	// uid, _ := strconv.ParseInt(u, 6, 12)
+	res := userService.Get(u)
+	if res.Status != 200 {
+		c.JSON(response.BADREQUEST, res)
+		return
+	}
+	c.JSON(response.SUCCESS, res)
 }

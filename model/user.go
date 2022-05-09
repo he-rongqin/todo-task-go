@@ -36,3 +36,15 @@ func (user *User) Insert() uint {
 	}
 	return user.ID
 }
+
+// 根据用户名查找
+func (user *User) GetUserByName(username string) {
+	dbMysql.Where(&User{Username: username}).First(&user)
+
+}
+
+// 用户详情
+func (user *User) Get(uid int) *User {
+	dbMysql.First(&user, uid)
+	return user
+}
